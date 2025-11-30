@@ -4,110 +4,277 @@ import Editor, { OnMount } from '@monaco-editor/react';
 import styled from 'styled-components';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
-const EditorContainer = styled.div`
+// --- STYLES ---
+const Layout = styled.div`
   display: flex;
+  flex-direction: column;
   height: 100vh;
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  font-family: 'Segoe UI', sans-serif;
 `;
 
-const FileExplorer = styled.div`
-  width: 200px;
-  background-color: #252526;
-  padding: 1rem;
-  color: #cccccc;
+const Header = styled.div`
+  height: 35px;
+  background-color: #333333;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  justify-content: space-between;
+  border-bottom: 1px solid #252526;
 `;
 
-const CodeEditor = styled.div`
+const MainArea = styled.div`
+  display: flex;
   flex: 1;
-  position: relative;
-  overflow: hidden; 
+  overflow: hidden;
 `;
+
+const Sidebar = styled.div`
+  width: 250px;
+  background-color: #252526;
+  border-right: 1px solid #1e1e1e;
+  display: flex;
+  flex-direction: column;
+`;
+
+const FileItem = styled.div<{ active: boolean }>`
+  padding: 5px 15px;
+  cursor: pointer;
+  background-color: ${props => props.active ? '#37373d' : 'transparent'};
+  color: ${props => props.active ? '#ffffff' : '#cccccc'};
+  &:hover { background-color: #2a2d2e; }
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+`;
+
+const EditorWrapper = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+`;
+
+const Terminal = styled.div`
+  height: 150px;
+  background-color: #1e1e1e;
+  border-top: 1px solid #333;
+  padding: 10px;
+  font-family: 'Consolas', monospace;
+  font-size: 12px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+`;
+
+const Button = styled.button`
+  background-color: #0e639c;
+  color: white;
+  border: none;
+  padding: 5px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  &:hover { background-color: #1177bb; }
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 10px;
+`;
+
+// --- TYPES ---
+interface FileData {
+    id: number;
+    filename: string;
+    content: string;
+}
 
 const EditorPage: React.FC = () => {
     const { roomId } = useParams<{ roomId: string }>();
-    const [code, setCode] = useState<string>(''); // Used ONLY for initial load
     
+    // UI State
+    const [files, setFiles] = useState<FileData[]>([]);
+    const [activeFileId, setActiveFileId] = useState<number | null>(null);
+    const [output, setOutput] = useState<string>('Terminal ready...');
+    
+    // REFS
+    const filesRef = useRef<FileData[]>([]); 
+    const activeFileIdRef = useRef<number | null>(null);
     const socketRef = useRef<WebSocket | null>(null);
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
     const monacoRef = useRef<typeof monaco | null>(null);
-    
-    // FLAG: Prevents the "Echo Loop"
-    // (Server sends update -> Client updates editor -> Client triggers onChange -> Client sends back to Server)
+    const decorationsRef = useRef<string[]>([]);
     const isRemoteUpdate = useRef(false);
+    
+    // NEW: Ref to track the autocomplete provider so we can clean it up
+    const completionProviderRef = useRef<monaco.IDisposable | null>(null);
 
-    // 1. Initial Fetch (HTTP)
+    // Helpers
+    const updateFiles = (newFiles: FileData[]) => {
+        filesRef.current = newFiles;
+        setFiles(newFiles);
+    };
+
+    const updateActiveFileId = (id: number) => {
+        activeFileIdRef.current = id;
+        setActiveFileId(id);
+    };
+
+    // 1. Initial Load
     useEffect(() => {
-        const fetchInitialCode = async () => {
-            try {
-                const response = await fetch(`http://localhost:8000/rooms/${roomId}`);
-                const data = await response.json();
-                setCode(data.content || ""); 
-            } catch (error) {
-                console.error('Error fetching initial code:', error);
-            }
-        };
-
-        fetchInitialCode();
+        fetch(`http://localhost:8000/rooms/${roomId}/files`)
+            .then(res => res.json())
+            .then((data: FileData[]) => {
+                updateFiles(data);
+                if (data.length > 0) {
+                    updateActiveFileId(data[0].id);
+                }
+            });
     }, [roomId]);
 
-    // 2. WebSocket Logic
+    // 2. WebSocket Setup
     useEffect(() => {
-        // Small timeout to ensure browser is ready and avoid React Strict Mode double-connect issues
-        const timeoutId = setTimeout(() => {
-            if (socketRef.current) return;
+        const socket = new WebSocket(`ws://localhost:8000/ws/rooms/${roomId}`);
+        socketRef.current = socket;
 
-            console.log("Attempting WebSocket connection...");
-            const socket = new WebSocket(`ws://localhost:8000/ws/rooms/${roomId}`);
-            
-            socket.onopen = () => console.log("WebSocket Connected ✅");
-            socket.onerror = (error) => console.error("WebSocket Error ❌", error);
+        socket.onopen = () => console.log("WebSocket Connected");
 
-            socket.onmessage = (event) => {
-                const incomingCode = event.data;
-                
-                if (editorRef.current) {
-                    const currentContent = editorRef.current.getValue();
-                    
-                    // Only update if the content is actually different
-                    if (incomingCode !== currentContent) {
-                        // 1. Turn on the flag: "This is a remote update, don't broadcast it back"
+        socket.onmessage = (event) => {
+            const msg = JSON.parse(event.data);
+
+            if (msg.type === 'code') {
+                const updatedFiles = filesRef.current.map(f => 
+                    f.id === msg.fileId ? { ...f, content: msg.data } : f
+                );
+                updateFiles(updatedFiles);
+
+                if (msg.fileId === activeFileIdRef.current) {
+                    if (editorRef.current && editorRef.current.getValue() !== msg.data) {
                         isRemoteUpdate.current = true;
                         
-                        // 2. Save cursor position to minimize jumping
-                        const position = editorRef.current.getPosition();
+                        const pos = editorRef.current.getPosition();
+                        editorRef.current.setValue(msg.data);
+                        if (pos) editorRef.current.setPosition(pos);
                         
-                        // 3. Update Editor directly
-                        editorRef.current.setValue(incomingCode);
-                        
-                        // 4. Restore cursor position
-                        if (position) {
-                            editorRef.current.setPosition(position);
-                        }
-                        
-                        // 5. Turn off the flag
                         isRemoteUpdate.current = false;
                     }
                 }
-            };
-
-            socketRef.current = socket;
-        }, 100);
+            } 
+            else if (msg.type === 'cursor' && msg.fileId === activeFileIdRef.current) {
+                renderRemoteCursor(msg.position, msg.senderId);
+            }
+        };
 
         return () => {
-            clearTimeout(timeoutId);
-            if (socketRef.current) {
-                socketRef.current.close();
-                socketRef.current = null;
-            }
+            socket.close();
         };
     }, [roomId]);
 
-    // 3. Editor Mount & Autocomplete Setup (Restored)
+    const renderRemoteCursor = (position: any, senderId: string) => {
+        if (!editorRef.current || !monacoRef.current) return;
+        
+        const newDecorations: monaco.editor.IModelDeltaDecoration[] = [{
+            range: new monacoRef.current.Range(position.lineNumber, position.column, position.lineNumber, position.column),
+            options: {
+                className: 'remote-cursor',
+                hoverMessage: { value: `User ${senderId}` },
+            }
+        }];
+        
+        decorationsRef.current = editorRef.current.deltaDecorations(decorationsRef.current, newDecorations);
+    };
+
+    const handleEditorChange = (value: string | undefined) => {
+        if (isRemoteUpdate.current || !activeFileIdRef.current) return;
+        
+        const newContent = value || '';
+        
+        const updatedFiles = filesRef.current.map(f => 
+            f.id === activeFileIdRef.current ? { ...f, content: newContent } : f
+        );
+        filesRef.current = updatedFiles;
+
+        if (socketRef.current?.readyState === WebSocket.OPEN) {
+            socketRef.current.send(JSON.stringify({
+                type: 'code',
+                fileId: activeFileIdRef.current,
+                data: newContent
+            }));
+        }
+    };
+
+    const handleRun = async () => {
+        if (!activeFileIdRef.current) return;
+        setOutput("Running...");
+        
+        const currentFile = filesRef.current.find(f => f.id === activeFileIdRef.current);
+        if (!currentFile) return;
+
+        try {
+            const res = await fetch('http://localhost:8000/run', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: currentFile.content })
+            });
+            const data = await res.json();
+            setOutput(data.output);
+        } catch (e) {
+            setOutput("Error connecting to runner.");
+        }
+    };
+
+    const handleSave = async () => {
+        if (!activeFileIdRef.current) return;
+        const currentFile = filesRef.current.find(f => f.id === activeFileIdRef.current);
+        if (!currentFile) return;
+
+        await fetch(`http://localhost:8000/files/${currentFile.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content: currentFile.content })
+        });
+        alert('Saved!');
+    };
+
+    const handleNewFile = async () => {
+        const name = prompt("File name:");
+        if (name && roomId) {
+            const res = await fetch('http://localhost:8000/files', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename: name, roomId })
+            });
+            const newFile = await res.json();
+            
+            const newFileList = [...filesRef.current, newFile];
+            updateFiles(newFileList);
+            updateActiveFileId(newFile.id);
+        }
+    };
+
+    const handleFileClick = (id: number) => {
+        if (editorRef.current && activeFileIdRef.current) {
+            const currentContent = editorRef.current.getValue();
+            const updatedFiles = filesRef.current.map(f => 
+                f.id === activeFileIdRef.current ? { ...f, content: currentContent } : f
+            );
+            filesRef.current = updatedFiles;
+        }
+        updateActiveFileId(id);
+    };
+
+    // --- EDITOR MOUNT (Here is the Fix) ---
     const handleEditorDidMount: OnMount = (editor, monacoInstance) => {
         editorRef.current = editor;
         monacoRef.current = monacoInstance;
 
-        // Register the "Ghost Text" provider
-        monacoInstance.languages.registerInlineCompletionsProvider('python', {
+        // 1. Dispose previous provider to avoid duplicates when switching files
+        if (completionProviderRef.current) {
+            completionProviderRef.current.dispose();
+        }
+
+        // 2. Register Autocomplete Provider
+        completionProviderRef.current = monacoInstance.languages.registerInlineCompletionsProvider('python', {
             provideInlineCompletions: async (model, position) => {
                 const textUntilPosition = model.getValue();
                 
@@ -123,73 +290,94 @@ const EditorPage: React.FC = () => {
                     });
 
                     const data = await response.json();
-                    
-                    if (!data.suggestion) {
-                        return { items: [] };
-                    }
+                    if (!data.suggestion) return { items: [] };
 
                     return {
-                        items: [
-                            {
-                                insertText: data.suggestion,
-                                range: new monacoInstance.Range(
-                                    position.lineNumber,
-                                    position.column,
-                                    position.lineNumber,
-                                    position.column + data.suggestion.length
-                                ),
-                            },
-                        ],
+                        items: [{
+                            insertText: data.suggestion,
+                            range: new monacoInstance.Range(
+                                position.lineNumber,
+                                position.column,
+                                position.lineNumber,
+                                position.column + data.suggestion.length
+                            ),
+                        }],
                     };
                 } catch (error) {
-                    console.error('Autocomplete error:', error);
                     return { items: [] };
                 }
             },
-            // This satisfies the TypeScript interface requirement
             disposeInlineCompletions: () => {} 
+        });
+
+        // 3. Register Cursor Broadcasting
+        editor.onDidChangeCursorPosition((e) => {
+            if (socketRef.current?.readyState === WebSocket.OPEN && activeFileIdRef.current) {
+                socketRef.current.send(JSON.stringify({
+                    type: 'cursor',
+                    fileId: activeFileIdRef.current,
+                    position: e.position,
+                    senderId: 'User' 
+                }));
+            }
         });
     };
 
-    // 4. Handle Local Changes
-    const handleEditorChange = (value: string | undefined) => {
-        // Stop if this change came from the WebSocket
-        if (isRemoteUpdate.current) {
-            return;
-        }
-
-        const newCode = value || '';
-        
-        // Only send if socket is open
-        if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-            socketRef.current.send(newCode);
-        }
-    };
+    const activeFile = files.find(f => f.id === activeFileId);
 
     return (
-        <EditorContainer>
-            <FileExplorer>
-                <h3>Files</h3>
-            </FileExplorer>
-            <CodeEditor>
-                <Editor
-                    height="100%"
-                    language="python"
-                    theme="vs-dark"
-                    // KEY CHANGE: Use defaultValue, NOT value
-                    defaultValue={code} 
-                    onMount={handleEditorDidMount}
-                    onChange={handleEditorChange}
-                    options={{
-                        fontSize: 14,
-                        minimap: { enabled: false },
-                        automaticLayout: true,
-                        inlineSuggest: { enabled: true },
-                        quickSuggestions: false, 
-                    }}
-                />
-            </CodeEditor>
-        </EditorContainer>
+        <Layout>
+            <Header>
+                <span style={{ fontSize: '14px', fontWeight: 'bold' }}>VS Code Clone</span>
+                <div style={{ display: 'flex' }}>
+                    <Button onClick={handleRun} style={{background: '#2da042'}}>▶ Run</Button>
+                    <Button onClick={handleSave} style={{background: '#007acc'}}>💾 Save</Button>
+                </div>
+            </Header>
+            <MainArea>
+                <Sidebar>
+                    <div style={{ padding: '10px', fontSize: '11px', fontWeight: 'bold' }}>EXPLORER</div>
+                    {files.map(file => (
+                        <FileItem 
+                            key={file.id} 
+                            active={file.id === activeFileId}
+                            onClick={() => handleFileClick(file.id)}
+                        >
+                            📄 {file.filename}
+                        </FileItem>
+                    ))}
+                    <FileItem active={false} onClick={handleNewFile} style={{ color: '#007acc', marginTop: '10px' }}>
+                        + New File
+                    </FileItem>
+                </Sidebar>
+                <EditorWrapper>
+                    {activeFile ? (
+                        <Editor
+                            key={activeFile.id} 
+                            height="100%"
+                            language="python"
+                            theme="vs-dark"
+                            path={activeFile.filename}
+                            defaultValue={activeFile.content}
+                            onMount={handleEditorDidMount}
+                            onChange={handleEditorChange}
+                            options={{
+                                fontSize: 14,
+                                minimap: { enabled: false },
+                                automaticLayout: true,
+                                inlineSuggest: { enabled: true }, // Ensure this is true
+                            }}
+                        />
+                    ) : (
+                        <div style={{ padding: '20px', color: '#666' }}>Select a file...</div>
+                    )}
+                </EditorWrapper>
+            </MainArea>
+            <Terminal>
+                <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>TERMINAL</div>
+                {output}
+            </Terminal>
+        </Layout>
     );
 };
 

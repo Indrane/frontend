@@ -11,3 +11,22 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Represents the vertical bar of the cursor */
+.remote-cursor {
+    border-left: 2px solid #ff0000; /* Red cursor */
+    height: 100% !important;
+}
+
+/* Optional: Add a name tag above the cursor */
+.remote-cursor:hover::after {
+    content: "Remote User";
+    position: absolute;
+    top: -20px;
+    left: 0;
+    background: #ff0000;
+    color: white;
+    font-size: 10px;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
