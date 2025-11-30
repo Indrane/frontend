@@ -328,7 +328,7 @@ const EditorPage: React.FC = () => {
     return (
         <Layout>
             <Header>
-                <span style={{ fontSize: '14px', fontWeight: 'bold' }}>VS Code Clone</span>
+                <span style={{ fontSize: '14px', fontWeight: 'bold' }}>Code Collab-bro</span>
                 <div style={{ display: 'flex' }}>
                     <Button onClick={handleRun} style={{background: '#2da042'}}>▶ Run</Button>
                     <Button onClick={handleSave} style={{background: '#007acc'}}>💾 Save</Button>
