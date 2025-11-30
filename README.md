@@ -7,15 +7,17 @@ A lightweight, high-performance web application that allows developers to edit c
 See the application in action.
 
 1. The Workspace
-    ![alt text](screenshot/maineditor.png)
+   
+   <img width="1867" height="963" alt="maineditor" src="https://github.com/user-attachments/assets/e3384a2a-15be-443e-aaf0-b858001a8aff" />
+
     A clean, dark-themed coding environment optimized for focus.
 
-2. Real-Time Collaboration
+3. Real-Time Collaboration
     [colab-demo.webm](https://github.com/user-attachments/assets/46d459f8-acce-4778-8efb-557e1ff269c4)
 
     See other users' cursors and edits instantly as they type.
 
-3. Code Execution & Terminal
+4. Code Execution & Terminal
     [code-execution-demo.webm](https://github.com/user-attachments/assets/51d8baf2-50e1-4ebe-8a12-58a12b3fca7b)
 
     Execute Python code directly in the browser and see results immediately.
@@ -92,7 +94,9 @@ Step 1: Create a Room
 
 When you first open the application, you may be redirected to a room or asked to create one (depending on current routing).
 
-    ![alt text](screenshot/room-hompage.png)
+   
+    <img width="1920" height="1080" alt="room-hompage" src="https://github.com/user-attachments/assets/2fae572b-b759-429f-b43b-090997a4bede" />
+
 
 Step 2: Create a New File
 
@@ -104,7 +108,9 @@ Step 2: Create a New File
 
     The new file will appear in the list and automatically open.
 
-    ![alt text](screenshot/create-new-file.png)
+    
+    <img width="1920" height="1080" alt="create-new-file" src="https://github.com/user-attachments/assets/d16913c9-008f-48f3-802c-5f58a0be55cf" />
+
 
 Step 3: Test Real-Time Sync
 
@@ -116,7 +122,9 @@ Step 3: Test Real-Time Sync
 
     Verify: You should see the text appear in Window B instantly, along with a colored cursor showing the other user's position.
 
-    ![alt text](screenshot/colab-sidebyside.png)
+    
+    <img width="1920" height="1080" alt="colab-sidebyside" src="https://github.com/user-attachments/assets/1fc77999-e2f1-4de1-b552-b128d95be2a5" />
+
 
 Step 4: Run Code
 
@@ -129,7 +137,9 @@ Step 4: Run Code
 
     Verify: The "TERMINAL" panel at the bottom should display the output.
 
-    ![alt text](screenshot/run-demo.png)
+    
+    <img width="1920" height="1080" alt="run-demo" src="https://github.com/user-attachments/assets/e81ea912-53e8-4cae-b0cc-d68dfb995731" />
+
 
 Step 5: Autocomplete
 
@@ -137,7 +147,8 @@ Step 5: Autocomplete
 
     Verify: A grey "ghost text" suggestion should appear. Press Tab to accept it.
 
-    ![alt text](screenshot/autocomplete.png)
+    <img width="1920" height="1080" alt="autocomplete" src="https://github.com/user-attachments/assets/a4cb8e02-c1e1-45e8-bfb3-d996b5f5da00" />
+
 
 🛠️ Technology Stack
 
