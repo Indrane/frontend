@@ -6,6 +6,7 @@ A lightweight, high-performance web application that allows developers to edit c
 
 See the application in action.
 
+
 1. The Workspace
    
    <img width="1867" height="963" alt="maineditor" src="https://github.com/user-attachments/assets/e3384a2a-15be-443e-aaf0-b858001a8aff" />
