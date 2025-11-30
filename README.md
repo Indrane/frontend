@@ -7,15 +7,15 @@ A lightweight, high-performance web application that allows developers to edit c
 See the application in action.
 
 1. The Workspace
-    ![alt text](../screenshot/maineditor.png)
+    ![alt text](screenshot/maineditor.png)
     A clean, dark-themed coding environment optimized for focus.
 
 2. Real-Time Collaboration
-    <video src="./screenshot/colab-demo.webm" width="100%" autoplay loop muted></video>
+    <video src="screenshot/colab-demo.webm" width="100%" autoplay loop muted></video>
     See other users' cursors and edits instantly as they type.
 
 3. Code Execution & Terminal
-    <video src="./screenshot/code-execution-demo.webm" width="100%" autoplay loop muted></video>
+    <video src="screenshot/code-execution-demo.webm" width="100%" autoplay loop muted></video>
     Execute Python code directly in the browser and see results immediately.
 
 ✨ Features
@@ -90,7 +90,7 @@ Step 1: Create a Room
 
 When you first open the application, you may be redirected to a room or asked to create one (depending on current routing).
 
-    ![alt text](../screenshot/room-hompage.png)
+    ![alt text](screenshot/room-hompage.png)
 
 Step 2: Create a New File
 
@@ -102,7 +102,7 @@ Step 2: Create a New File
 
     The new file will appear in the list and automatically open.
 
-    ![alt text](../screenshot/create-new-file.png)
+    ![alt text](screenshot/create-new-file.png)
 
 Step 3: Test Real-Time Sync
 
@@ -114,7 +114,7 @@ Step 3: Test Real-Time Sync
 
     Verify: You should see the text appear in Window B instantly, along with a colored cursor showing the other user's position.
 
-    ![alt text](../screenshot/colab-sidebyside.png)
+    ![alt text](screenshot/colab-sidebyside.png)
 
 Step 4: Run Code
 
@@ -127,7 +127,7 @@ Step 4: Run Code
 
     Verify: The "TERMINAL" panel at the bottom should display the output.
 
-    ![alt text](../screenshot/run-demo.png)
+    ![alt text](screenshot/run-demo.png)
 
 Step 5: Autocomplete
 
@@ -135,7 +135,7 @@ Step 5: Autocomplete
 
     Verify: A grey "ghost text" suggestion should appear. Press Tab to accept it.
 
-    ![alt text](../screenshot/autocomplete.png)
+    ![alt text](screenshot/autocomplete.png)
 
 🛠️ Technology Stack
 
