@@ -95,7 +95,7 @@ Step 1: Create a Room
 When you first open the application, you may be redirected to a room or asked to create one (depending on current routing).
 
    
-    <img width="1920" height="1080" alt="room-hompage" src="https://github.com/user-attachments/assets/2fae572b-b759-429f-b43b-090997a4bede" />
+   <img width="1920" height="1080" alt="room-hompage" src="https://github.com/user-attachments/assets/2fae572b-b759-429f-b43b-090997a4bede" />
 
 
 Step 2: Create a New File
@@ -109,7 +109,7 @@ Step 2: Create a New File
     The new file will appear in the list and automatically open.
 
     
-    <img width="1920" height="1080" alt="create-new-file" src="https://github.com/user-attachments/assets/d16913c9-008f-48f3-802c-5f58a0be55cf" />
+   <img width="1920" height="1080" alt="create-new-file" src="https://github.com/user-attachments/assets/d16913c9-008f-48f3-802c-5f58a0be55cf" />
 
 
 Step 3: Test Real-Time Sync
@@ -123,7 +123,7 @@ Step 3: Test Real-Time Sync
     Verify: You should see the text appear in Window B instantly, along with a colored cursor showing the other user's position.
 
     
-    <img width="1920" height="1080" alt="colab-sidebyside" src="https://github.com/user-attachments/assets/1fc77999-e2f1-4de1-b552-b128d95be2a5" />
+   <img width="1920" height="1080" alt="colab-sidebyside" src="https://github.com/user-attachments/assets/1fc77999-e2f1-4de1-b552-b128d95be2a5" />
 
 
 Step 4: Run Code
@@ -138,7 +138,7 @@ Step 4: Run Code
     Verify: The "TERMINAL" panel at the bottom should display the output.
 
     
-    <img width="1920" height="1080" alt="run-demo" src="https://github.com/user-attachments/assets/e81ea912-53e8-4cae-b0cc-d68dfb995731" />
+   <img width="1920" height="1080" alt="run-demo" src="https://github.com/user-attachments/assets/e81ea912-53e8-4cae-b0cc-d68dfb995731" />
 
 
 Step 5: Autocomplete
@@ -147,7 +147,7 @@ Step 5: Autocomplete
 
     Verify: A grey "ghost text" suggestion should appear. Press Tab to accept it.
 
-    <img width="1920" height="1080" alt="autocomplete" src="https://github.com/user-attachments/assets/a4cb8e02-c1e1-45e8-bfb3-d996b5f5da00" />
+   <img width="1920" height="1080" alt="autocomplete" src="https://github.com/user-attachments/assets/a4cb8e02-c1e1-45e8-bfb3-d996b5f5da00" />
 
 
 🛠️ Technology Stack
