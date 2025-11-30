@@ -11,11 +11,13 @@ See the application in action.
     A clean, dark-themed coding environment optimized for focus.
 
 2. Real-Time Collaboration
-    <video src="screenshot/colab-demo.webm" width="100%" autoplay loop muted></video>
+    [colab-demo.webm](https://github.com/user-attachments/assets/46d459f8-acce-4778-8efb-557e1ff269c4)
+
     See other users' cursors and edits instantly as they type.
 
 3. Code Execution & Terminal
-    <video src="screenshot/code-execution-demo.webm" width="100%" autoplay loop muted></video>
+    [code-execution-demo.webm](https://github.com/user-attachments/assets/51d8baf2-50e1-4ebe-8a12-58a12b3fca7b)
+
     Execute Python code directly in the browser and see results immediately.
 
 ✨ Features
