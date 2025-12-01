@@ -1,7 +1,6 @@
 {
-  "version": 2,
-  "builds": [
-    { "src": "package.json", "use": "@vercel/static-build" }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "env": {
     "REACT_APP_BACKEND_URL": "https://prototype-backend-ucgl.onrender.com"
