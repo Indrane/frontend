@@ -170,3 +170,30 @@ Environment Configuration
     ```
 
     You can use the included `.env.example` as a template.
+
+Vercel Deployment
+
+        This project can be deployed to Vercel as a static site since it is a Create React App build.
+
+        1. Add a `vercel.json` to the project root (already included) which uses the `@vercel/static-build` builder.
+        2. In your Vercel project settings, set the environment variable `REACT_APP_BACKEND_URL` to the base URL of your backend (for example `https://api.example.com`).
+        3. Deploy the project. Vercel will run `npm run build` and serve the `build/` directory.
+
+        Example `vercel.json` (already added):
+
+        ```json
+        {
+            "version": 2,
+            "builds": [
+                { "src": "package.json", "use": "@vercel/static-build" }
+            ],
+            "env": {
+                "REACT_APP_BACKEND_URL": "https://your-backend.example.com"
+            }
+        }
+        ```
+
+        Notes:
+
+        - For WebSocket connections, the frontend derives the WS URL from the `REACT_APP_BACKEND_URL` (it swaps `http` -> `ws` or `https` -> `wss`). Set the backend URL accordingly.
+        - It's recommended to set the environment variable in the Vercel dashboard rather than committing secrets into `vercel.json`.
