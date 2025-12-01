@@ -4,6 +4,10 @@ import Editor, { OnMount } from '@monaco-editor/react';
 import styled from 'styled-components';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
+// Read backend base URL from environment with a fallback for development
+const BACKEND_BASE: string = (process.env.REACT_APP_BACKEND_URL as string) || 'http://localhost:8000';
+const WS_BASE: string = BACKEND_BASE.replace(/^http/, 'ws');
+
 // --- STYLES ---
 const Layout = styled.div`
   display: flex;
@@ -122,7 +126,7 @@ const EditorPage: React.FC = () => {
 
     // 1. Initial Load
     useEffect(() => {
-        fetch(`http://localhost:8000/rooms/${roomId}/files`)
+        fetch(`${BACKEND_BASE}/rooms/${roomId}/files`)
             .then(res => res.json())
             .then((data: FileData[]) => {
                 updateFiles(data);
@@ -134,7 +138,7 @@ const EditorPage: React.FC = () => {
 
     // 2. WebSocket Setup
     useEffect(() => {
-        const socket = new WebSocket(`ws://localhost:8000/ws/rooms/${roomId}`);
+        const socket = new WebSocket(`${WS_BASE}/ws/rooms/${roomId}`);
         socketRef.current = socket;
 
         socket.onopen = () => console.log("WebSocket Connected");
@@ -211,7 +215,7 @@ const EditorPage: React.FC = () => {
         if (!currentFile) return;
 
         try {
-            const res = await fetch('http://localhost:8000/run', {
+            const res = await fetch(`${BACKEND_BASE}/run`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code: currentFile.content })
@@ -228,7 +232,7 @@ const EditorPage: React.FC = () => {
         const currentFile = filesRef.current.find(f => f.id === activeFileIdRef.current);
         if (!currentFile) return;
 
-        await fetch(`http://localhost:8000/files/${currentFile.id}`, {
+        await fetch(`${BACKEND_BASE}/files/${currentFile.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ content: currentFile.content })
@@ -239,7 +243,7 @@ const EditorPage: React.FC = () => {
     const handleNewFile = async () => {
         const name = prompt("File name:");
         if (name && roomId) {
-            const res = await fetch('http://localhost:8000/files', {
+            const res = await fetch(`${BACKEND_BASE}/files`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ filename: name, roomId })
@@ -279,7 +283,7 @@ const EditorPage: React.FC = () => {
                 const textUntilPosition = model.getValue();
                 
                 try {
-                    const response = await fetch('http://localhost:8000/autocomplete', {
+                    const response = await fetch(`${BACKEND_BASE}/autocomplete`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({

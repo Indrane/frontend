@@ -158,3 +158,15 @@ Step 5: Autocomplete
     Backend: Python, FastAPI, WebSockets, SQLAlchemy
 
     Database: PostgreSQL (Compatible)
+
+Environment Configuration
+
+    - The frontend reads the backend base URL from the environment variable `REACT_APP_BACKEND_URL`.
+    - By default the app falls back to `http://localhost:8000` when the env var is not set.
+    - To customize this for production or other environments, create a `.env` file in the `frontend/` folder (or set the variable in your hosting environment) with:
+
+    ```text
+    REACT_APP_BACKEND_URL=https://your-backend.example.com
+    ```
+
+    You can use the included `.env.example` as a template.
