@@ -170,6 +170,23 @@ Environment Configuration
     ```
 
     You can use the included `.env.example` as a template.
+🔮 Future Improvements & Limitations
+
+While this prototype demonstrates the core capabilities of a collaborative editor, there are several areas for enhancement:
+
+Future Improvements
+- **True AI Integration:** Connect to an LLM API (OpenAI/Anthropic) for context-aware code completion and explanation.
+- **Sandboxed Runner:** Implement a secure execution environment to safely run untrusted code.
+- **User Accounts & Projects:** Add authentication (Auth0/Firebase) and project management to save work permanently.
+- **Multi-Language Support:** Extend the backend runner to support JavaScript, Go, Rust, and C++.
+- **Operational Transform / CRDTs:** Implement more robust conflict resolution algorithms (like Yjs) for better scaling of collaborative editing.
+
+Limitations
+- **Security:** The code execution engine runs code with limited isolation. A production-ready version would require strict sandboxing (e.g., Docker containers or gVisor) to prevent malicious execution.
+- **Mocked Autocomplete:** The current "AI" autocomplete is a static mock for demonstration. It does not use a real LLM.
+- **No Authentication:** Users are anonymous. There is no persistent user profile or secure login.
+- **Flat File System:** The editor currently supports a flat list of files without folder hierarchy.
+
 
 Vercel Deployment
 
@@ -197,3 +214,5 @@ Vercel Deployment
 
         - For WebSocket connections, the frontend derives the WS URL from the `REACT_APP_BACKEND_URL` (it swaps `http` -> `ws` or `https` -> `wss`). Set the backend URL accordingly.
         - It's recommended to set the environment variable in the Vercel dashboard rather than committing secrets into `vercel.json`.
+
+
